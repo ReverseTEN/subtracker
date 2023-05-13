@@ -75,7 +75,6 @@ The script will perform the following steps:
 - Find subdomains using abuseipdb
 - Merge and remove duplicates
 - **Perform DNS brute-forcing using dnsgen & alterx and shuffledns**
-- **Perform DNS brute-forcing using dnsgen and shuffledns**
 - **Compare the subdomains found through brute-forcing with the common merged subdomain list to identify any valuable subdomains with high potential for bug hunting**
 - Save the valuable subdomains to a file
 - he results will be saved in a folder with the target name.
