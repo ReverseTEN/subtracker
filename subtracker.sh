@@ -75,8 +75,16 @@ InitialCheck () {
     #Resolve subdomains with shuffledns using a wordlist and resolvers
     echo "[+] Resolving Subdomains: *This May Take a Moment to Complete.*"
     shuffledns -silent -d $1 -w dependency/wordlist.txt -silent -r dependency/resolvers.txt -o $1/$1-dns
+    #checks whether there are any valuable subdomains found from the DNS brute force and notifies the user accordingly.
 
+    cat $1/$1-dns | anew $1/$1-subdomains.txt > $1/$1-valuable_subdomains_dns.txt
+    if [ -s "$1/$1-valuable_subdomains_dns" ]; then
+        echo "[:globe_with_meridians:] Valuable subdomains discovered through DNS brute force for $1: $(cat $1/${1}-valuable_subdomains_dns | wc -l)" | notify -silent
+    else
+        :
+    fi    
     # Generate additional subdomains using dnsgen and combine with original list
+    
     echo "[+] Generate additional subdomains using dnsgen & alterx "
     cat $1/$1-subdomains.txt | dnsgen - > $1/$1-dnsgen
     cat $1/$1-subdomains.txt | alterx -silent > $1/$1-alterx
@@ -99,8 +107,8 @@ InitialCheck () {
     
     #checks whether there are any valuable subdomains found from the DNS brute force and notifies the user accordingly.
     if [ -s "$1/$1-valuable_subdomains.txt" ]; then
-        echo "[:globe_with_meridians:] Valuable subdomains discovered through DNS brute force for $1: $(cat $1/${1}-valuable_subdomains.txt | wc -l)" | notify -silent
-        cat $1/$1-valuable_subdomains.txt | notify -silent
+        echo "[:globe_with_meridians:] Valuable subdomains discovered through {FULL} DNS brute force for $1: $(cat $1/${1}-valuable_subdomains.txt | wc -l)" | notify -silent
+        # cat $1/$1-valuable_subdomains.txt | notify -silent
     else
         :
     fi
