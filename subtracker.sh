@@ -79,7 +79,7 @@ InitialCheck () {
 
     cat $1/$1-dns | anew $1/$1-subdomains.txt > $1/$1-valuable_subdomains_dns.txt
     if [ -s "$1/$1-valuable_subdomains_dns.txt" ]; then
-        echo "[:globe_with_meridians:] Valuable subdomains discovered through DNS brute force for $1: $(cat $1/${1}-valuable_subdomains_dns | wc -l)" | notify -silent
+        echo "[:globe_with_meridians:] Valuable subdomains discovered through DNS brute force for $1: $(cat $1/${1}-valuable_subdomains_dns.txt | wc -l)" | notify -silent
     else
         :
     fi    
