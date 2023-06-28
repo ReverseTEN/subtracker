@@ -43,6 +43,10 @@ check_requirements() {
 }
 
 
+send_notification() {
+  echo -e "$1" | notify -silent -id subtracker
+}
+
 InitialCheck () {
 
     
@@ -69,17 +73,18 @@ InitialCheck () {
     
     #line displays the number of subdomains found for the target and passes it to the next function for further processing.
     
-    echo "[+] Target: $1 -> Found $(cat $1/${1}-subdomains.txt | wc -l) subdomains."
+    send_notification  "[+] Target: $1 -> Found $(cat $1/${1}-subdomains.txt | wc -l) subdomains."
 
     
     #Resolve subdomains with shuffledns using a wordlist and resolvers
-    echo "[+] Resolving Subdomains: *This May Take a Moment to Complete.*"
-    shuffledns -silent -d $1 -w dependency/wordlist.txt -silent -r dependency/resolvers.txt -o $1/$1-dns
+    send_notification  "[+] Resolving Subdomains: *This May Take a Moment to Complete.*"
+    shuffledns -silent -d $1 -w dependency/wordlist.txt -r dependency/resolvers.txt -o $1/$1-dns
     #checks whether there are any valuable subdomains found from the DNS brute force and notifies the user accordingly.
 
     cat $1/$1-dns | anew $1/$1-subdomains.txt > $1/$1-valuable_subdomains_dns.txt
     if [ -s "$1/$1-valuable_subdomains_dns.txt" ]; then
-        echo "[:globe_with_meridians:] Valuable subdomains discovered through DNS brute force for $1: $(cat $1/${1}-valuable_subdomains_dns.txt | wc -l)" | notify -silent
+        send_notification "[:globe_with_meridians:] Valuable subdomains discovered through DNS brute force for $1: $(cat $1/${1}-valuable_subdomains_dns.txt | wc -l)"
+
     else
         :
     fi    
@@ -94,26 +99,29 @@ InitialCheck () {
     rm -rf $1/$1-dnsgen
     rm -rf $1/$1-subgen
     rm -rf $1/$1-alterx
-    echo "[+] Resolving {Full} Subdomains: *This May Take a Moment to Complete.*"
+    send_notification "[+] Resolving {Full} Subdomains: *This May Take a Moment to Complete.*"
 
     # Resolve subdomains again using shuffledns with newly generated list
     shuffledns -silent -d $1 -list $1/${1}-fulldns -r dependency/resolvers.txt -o $1/$1-lastdns
     
-    echo "[+] Target :$1 -> $(cat $1/$1-dns | wc -l) Resolving {public} Subdomains"
-    echo "[+] Target :$1 -> $(cat $1/$1-lastdns | wc -l) Resolving {private} Subdomains"
+    send_notification "[+] Target :$1 -> $(cat $1/$1-dns | wc -l) Resolving {public} Subdomains"
+    send_notification "[+] Target :$1 -> $(cat $1/$1-lastdns | wc -l) Resolving {private} Subdomains"
+
     
     #updated subdomains
     cat $1/$1-lastdns | anew $1/$1-subdomains.txt > $1/$1-valuable_subdomains.txt
     
     #checks whether there are any valuable subdomains found from the DNS brute force and notifies the user accordingly.
     if [ -s "$1/$1-valuable_subdomains.txt" ]; then
-        echo "[:globe_with_meridians:] Valuable subdomains discovered through {FULL} DNS brute force for $1: $(cat $1/${1}-valuable_subdomains.txt | wc -l)" | notify -silent
+        send_notification "[:globe_with_meridians:] Valuable subdomains discovered through {FULL} DNS brute force for $1: $(cat $1/${1}-valuable_subdomains.txt | wc -l)"
+
         # cat $1/$1-valuable_subdomains.txt | notify -silent
     else
         :
     fi
     
-    echo "[+] Found $(cat $1/$1-valuable_subdomains.txt | wc -l) high-potential targets!"
+    send_notification "[+] Found $(cat $1/${1}-valuable_subdomains.txt | wc -l) high-potential targets!"
+
 
 
     # number of updated subdomains for the target.
@@ -186,9 +194,10 @@ SecondCheck() {
     #checks whether there are any valuable subdomains found from the DNS brute force and notifies the user accordingly.
     if [ -s "$1/$1-valuable_subdomains2.txt" ]; then
 
-        echo "[:globe_with_meridians:] Valuable subdomains discovered through DNS brute force for $1: $(cat $1/${1}-valuable_subdomains2.txt | wc -l)" | notify -silent
+        send_notification "[:globe_with_meridians:] Valuable subdomains discovered through DNS brute force for $1: $(cat "$1/${1}-valuable_subdomains2.txt" | wc -l)"
 
-        cat $1/$1-valuable_subdomains2.txt | notify -silent
+        send_notification "$(cat "$1/$1-valuable_subdomains2.txt")"
+ 
     else
         :
     fi
@@ -197,17 +206,19 @@ SecondCheck() {
     cat $1/$1-Newsubdomains.txt | anew $1/$1-subdomains.txt > $1/$1-NewTarget.txt
 
     if [ -s "$1/$1-NewTarget.txt" ]; then
-        echo "[:globe_with_meridians:] Recently added subdomain: " | notify -silent
-        cat $1/$1-NewTarget.txt | notify -silent
+        send_notification "[:globe_with_meridians:] Recently added subdomain: "
+        send_notification "$(cat "$1/$1-NewTarget.txt")"
+
     else
-        echo "[:globe_with_meridians:] No new subdomains have been discovered. " | notify -silent
+        send_notification "[:globe_with_meridians:] No new subdomains have been discovered. "
     fi
 
-    echo "[+] Found $(cat $1/$1-valuable_subdomains2.txt | wc -l) high-potential targets!"
+    send_notification "[+] Found $(cat $1/$1-valuable_subdomains2.txt | wc -l) high-potential targets!"
 
-    echo "[+] New subdomains found in $1: $(cat $1/${1}-NewTarget.txt | wc -l)."
+    send_notification "[+] New subdomains found in $1: $(cat $1/${1}-NewTarget.txt | wc -l)."
 
-    echo "[+] Update  $1 Subdomains To -> $(cat $1/${1}-Newsubdomains.txt  | wc -l)" 
+    send_notification "[+] Update $1 Subdomains To -> $(cat $1/${1}-Newsubdomains.txt | wc -l)"
+
     
     rm -rf $1/$1-dns2
     rm -rf $1/$1-fulldns2
